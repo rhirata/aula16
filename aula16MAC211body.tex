@@ -1,0 +1,177 @@
+% Copyright 2007 by Till Tantau
+%
+% This file may be distributed and/or modified
+%
+% 1. under the LaTeX Project Public License and/or
+% 2. under the GNU Public License.
+%
+% See the file doc/licenses/LICENSE for more details.
+
+%
+% DO NOT USE THIS FILE AS A TEMPLATE FOR YOUR OWN TALKS¡!!
+%
+% Use a file in the directory solutions instead.
+% They are much better suited.
+%
+
+
+\lecture[]{CMake e Controle de versão}{lecture-text}
+
+\subtitle{Conceitos e técnicas}
+
+\date{24/4/2012}
+
+\begin{document}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+\section*{Libraries}
+
+\begin{frame}{Bibliotecas} 
+  \begin{itemize}
+  \item Esta parte da aula de hoje é baseada no texto:
+  \item Program library howto
+  \item David A. Wheeler
+  \pause 
+  \item E no tutorial de YoLinux.com: Static, Shared Dynamic and Loadable Linux Libraries
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bibliotecas} 
+  \begin{itemize}
+   \item Static: coleção de arquivos de códigos objetos.
+   \pause
+   \item Shared: também uma coleção de arquivos de códigos objetos, mas preparado
+         para ser carregado quando o programa é iniciado.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bibliotecas estáticas} 
+  \begin{itemize}
+   \item Bibliotecas estáticas são criadas com o programa \texttt{ar}
+  \pause
+  \item \texttt{ar rcs libctest.a file1.o file2.o}
+  \pause
+  \item Uma vez criada, pode-se usá-la usando a opção \texttt{-l} do gcc.
+  \pause
+  \item \texttt{gcc -Wall -o teste prog.c -L/path/to/library-directory -lctest}
+  \pause
+  \item \texttt{gcc -Wall -o teste prog.c libctest.a}
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Bibliotecas dinâmicas} 
+  \begin{itemize}
+   \item Bibliotecas dinâmicas são carregadas quando o programa é iniciado.
+  \pause
+  \item Isso implica que, quando instaladas corretamente, todos os 
+        programas que iniciam depois da instalação, automaticamente 
+        possam usar a nova biblioteca.
+  \pause
+  \item As bibliotecas podem ser atualizadas e os programas 
+        que queiram usar versões mais antigas e não compatíveis com a 
+        versão nova não quebrem.
+  \pause
+  \item Permite que as bibliotecas, ou funções específicas, possam ser sobrescritas
+        quando executando um programa particular. 
+  \pause
+  \item Fazer tudo isso enquanto os programas estão sendo executados 
+        e usando as bibliotecas existentes.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Bibliotecas dinâmicas} 
+  \begin{itemize}
+   \item Para isso, algumas convenções de nomes são importantes.
+  \pause
+  \item Toda biblioteca tem um nome especial chamado de "soname". 
+  \pause
+  \item Ele tem um prefixo "lib", o nome da biblioteca, o sufixo ".so"
+  \item seguido por um ponto e o número da versão (que é incrementado quando
+        a versão é mudada).
+  \pause
+  \item Em verdade, um soname qualificado é normalmente um link simbólico para a biblioteca.
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Bibliotecas dinâmicas} 
+  \begin{itemize}
+   \item As bibliotecas dinâmicas podem ser colocadas em qualquer lugar, mas a 
+         convenção da GNU é colocá-las em \texttt{/usr/local/lib}
+  \pause
+  \item O carregador de bibliotecas é o \texttt{/lib/ld-linux.so.X}
+  \pause
+  \item Por default, uma vez carregado, ele busca as bibliotecas no arquivo de 
+        configuração \texttt{/etc/ld.so.conf}
+  \pause
+  \item Caso queira-se sobrescrever bibliotecas, ou funções, seus nomes devem estar no
+        arquivo \texttt{/etc/ld.so.preload}
+  \pause
+  \item Como procurar nesses diretórios pode ser ineficiente, um programa pré-carrega
+        esses nomes: \texttt{ldconfig}. 
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Bibliotecas dinâmicas} 
+  \begin{itemize}
+   \item Há ainda formas de um usuário criar suas próprias bibliotecas e sobrescrever as existentes.
+  \pause
+  \item Para isso, usam-se as variáeis de ambiente \texttt{LD\_LIBRARY\_PATH}, \texttt{LD\_PRELOAD} 
+        e \texttt{LD\_DEBUG}
+  \pause
+  \item \texttt{LD\_LIBRARY\_PATH} conta para o sistema onde procurar as bibliotecas dinâmicas.
+  \pause
+  \item \texttt{LD\_PRELOAD} conta para o sistema onde procurar as bibliotecas que irão sobrescrever as existentes.
+  \pause
+  \item \texttt{LD\_DEBUG} torna o processo verborrático. 
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Bibliotecas dinâmicas} 
+  \begin{itemize}
+   \item Bibliotecas dinâmicas são criadas com o programa \texttt{gcc} 
+         e a opção \texttt{-fPIC}, ou \texttt{-fpic}.
+  \pause
+  \item \texttt{gcc -fPIC -g -c -Wall file1.c}
+  \pause
+  \item \texttt{gcc -fPIC -g -c -Wall file2.c}
+  \pause
+  \item \texttt{gcc -shared -fPIC -Wl,-soname,libctest.so.1 -o libctest.so.1.0.1 file1.o file2.o}
+  \pause
+  \item \texttt{mv libctest.so.1.0.1 /usr/local/lib}
+  \pause
+  \item \texttt{ldconfig -n}
+  \pause
+  \item Para usar, basta compilar com as opções -L e -l, como anteriormente.
+  \end{itemize}
+\end{frame}
+
+
+%
+% \begin{frame}{} 
+%   \begin{enumerate}
+%   \item
+%   \pause
+%   \item
+%   \pause
+%   \item
+%   \pause
+%   \item
+%   \pause
+%   \item
+%   \end{enumerate}
+% \end{frame}
+
+\end{document}
+
+
+
+
+
+
